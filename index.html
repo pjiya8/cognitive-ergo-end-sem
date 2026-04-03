@@ -1,0 +1,2785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hospital OPD Queue Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f4f4;
+      --card: #ffffff;
+      --line: #d9d9d9;
+      --soft: #ececec;
+      --text: #1d1d1d;
+      --muted: #6d6d6d;
+      --accent: #6f6f6f;
+      --success: #4f4f4f;
+      --warning: #707070;
+      --danger: #3f3f3f;
+      --shadow: 0 10px 24px rgba(0,0,0,0.05);
+      --radius: 20px;
+      --radius-sm: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .container {
+      max-width: 460px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .topbar .small-btn {
+      font-size: 12px;
+      border: 1px solid var(--line);
+      background: white;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+
+    .header-card {
+      padding: 18px;
+    }
+
+    .hospital-row {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .logo {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      border: 1px dashed var(--line);
+      background: var(--soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .hospital-info h1 {
+      font-size: 20px;
+      margin: 0 0 4px;
+      line-height: 1.2;
+    }
+
+    .hospital-info p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      padding: 8px 12px;
+      background: var(--soft);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: 0.1px;
+    }
+
+    .status-card {
+      padding: 20px;
+      border: 2px solid var(--line);
+    }
+
+    .status-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .pulse {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .updated {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .hero-number {
+      font-size: 46px;
+      font-weight: 800;
+      margin: 10px 0 2px;
+      letter-spacing: -1px;
+    }
+
+    .hero-sub {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .metric {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .metric .label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .metric .value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .info-box {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: white;
+    }
+
+    .info-box .label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .info-box .value {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .queue-visual {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-top: 14px;
+      padding: 14px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow-x: auto;
+    }
+
+    .dot {
+      width: 34px;
+      height: 34px;
+      min-width: 34px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      background: white;
+      color: var(--muted);
+      position: relative;
+    }
+
+    .dot.done {
+      background: #dcdcdc;
+      color: #333;
+      font-weight: 700;
+    }
+
+    .dot.current {
+      background: #bdbdbd;
+      color: white;
+      font-weight: 700;
+      transform: scale(1.06);
+    }
+
+    .dot.you {
+      border: 2px solid #444;
+      font-weight: 800;
+      color: #111;
+    }
+
+    .dot-label {
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+
+    .instruction {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .icon-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .instruction h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+
+    .instruction p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: #2f2f2f;
+      color: white;
+    }
+
+    .btn.secondary {
+      background: var(--soft);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .alerts {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .alert {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 14px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .alert strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: white;
+      margin-bottom: 10px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .details-grid .item {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .details-grid .item .k {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .details-grid .item .v {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .faq-item {
+      border-top: 1px solid var(--line);
+      padding: 12px 0;
+    }
+
+    .faq-item:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .faq-q {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .faq-a {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .caregiver {
+      font-size: 14px;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .caregiver .tip {
+      padding: 12px 14px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    .state-switcher {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 14px;
+    }
+
+    .state-btn {
+      white-space: nowrap;
+      border: 1px solid var(--line);
+      background: white;
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .mini-game {
+      text-align: center;
+    }
+
+    .mini-game p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+      margin-bottom: 14px;
+    }
+
+    canvas {
+      background: #efefef;
+      border: 2px solid var(--line);
+      border-radius: 18px;
+      display: block;
+      margin: 0 auto 12px;
+    }
+
+    .game-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 8px 10px 30px;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        max-width: 860px;
+      }
+
+      .two-col {
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        gap: 14px;
+      }
+
+      .three-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="topbar">
+      <button class="small-btn">🌐 English / हिन्दी</button>
+      <div style="display:flex; gap:8px;">
+        <button class="small-btn" onclick="readAloud()">🔊 Read aloud</button>
+        <button class="small-btn">❓ Need Help?</button>
+      </div>
+    </div>
+
+    <div class="state-switcher">
+      <button class="state-btn" onclick="setState('waiting')">Normal Waiting</button>
+      <button class="state-btn" onclick="setState('closer')">Move Closer</button>
+      <button class="state-btn" onclick="setState('serving')">Now Serving</button>
+      <button class="state-btn" onclick="setState('delayed')">Doctor Delayed</button>
+      <button class="state-btn" onclick="setState('changed')">Room Changed</button>
+      <button class="state-btn" onclick="setState('missed')">Missed Turn</button>
+    </div>
+
+    <div class="card header-card">
+      <div class="hospital-row">
+        <div class="logo">LOGO</div>
+        <div class="hospital-info">
+          <h1>District Civil Hospital</h1>
+          <p>General Medicine OPD • Thursday, 2 April 2026</p>
+        </div>
+      </div>
+
+      <div class="chip-row">
+        <div class="chip">Dr. A. Sharma</div>
+        <div class="chip">Follow-up Visit</div>
+        <div class="chip">Ref: GH-2048-A</div>
+        <div class="chip">Patient: N***</div>
+      </div>
+    </div>
+
+    <div class="card status-card" id="statusCard">
+      <div class="status-top">
+        <div class="status-badge">
+          <div class="pulse"></div>
+          <span id="statusText">Checked In • Waiting</span>
+        </div>
+        <div class="updated" id="updatedTime">Updated 1 min ago</div>
+      </div>
+
+      <div class="hero-number" id="patientsBefore">8</div>
+      <div class="hero-sub" id="heroSub">patients before you • approx. 35 mins</div>
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="label">Your token</div>
+          <div class="value" id="yourToken">A-27</div>
+        </div>
+        <div class="metric">
+          <div class="label">Now serving</div>
+          <div class="value" id="currentToken">A-19</div>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-box">
+          <div class="label">Doctor status</div>
+          <div class="value" id="doctorStatus">On time</div>
+        </div>
+        <div class="info-box">
+          <div class="label">Room / cabin</div>
+          <div class="value" id="roomValue">Room 12</div>
+        </div>
+        <div class="info-box">
+          <div class="label">Floor / block</div>
+          <div class="value" id="floorValue">2nd Floor, Block B</div>
+        </div>
+        <div class="info-box">
+          <div class="label">Direction</div>
+          <div class="value" id="directionValue">Left wing, near pathology</div>
+        </div>
+      </div>
+
+      <div class="queue-visual" id="queueVisual"></div>
+      <div class="dot-label" id="queueLabel">You are getting closer. Please stay available.</div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="section-title">What you should do now</div>
+        <div class="instruction">
+          <div class="icon-circle" id="instructionIcon">🪑</div>
+          <div>
+            <h3 id="instructionTitle">You may wait in the seating area</h3>
+            <p id="instructionText">Please stay within hearing distance. Keep your reports ready.</p>
+          </div>
+        </div>
+        <div class="action-row">
+          <button class="btn primary">View directions</button>
+          <button class="btn secondary">Ask help desk</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Location</div>
+        <div class="details-grid">
+          <div class="item">
+            <div class="k">Department</div>
+            <div class="v">General Medicine OPD</div>
+          </div>
+          <div class="item">
+            <div class="k">Room</div>
+            <div class="v" id="locRoom">12</div>
+          </div>
+          <div class="item">
+            <div class="k">Floor</div>
+            <div class="v">2nd Floor</div>
+          </div>
+          <div class="item">
+            <div class="k">Nearest landmark</div>
+            <div class="v">Next to Pathology</div>
+          </div>
+        </div>
+        <div class="action-row">
+          <button class="btn secondary">How to reach</button>
+          <button class="btn secondary">Wrong department?</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Live alerts & updates</div>
+      <div class="alerts" id="alertsContainer">
+        <div class="alert">
+          <div>⏱</div>
+          <div><strong>Queue moving normally</strong>Current consultation speed is steady.</div>
+        </div>
+        <div class="alert">
+          <div>📢</div>
+          <div><strong>Please keep reports ready</strong>You may be called soon as the line progresses.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Missed your turn?</div>
+      <div class="instruction">
+        <div class="icon-circle">🤝</div>
+        <div>
+          <h3 style="margin-bottom:6px;">We can help you rejoin</h3>
+          <p>Went to the washroom, got confused, or missed the audio call? Tap below for assistance.</p>
+        </div>
+      </div>
+      <div class="action-row">
+        <button class="btn primary">Request rejoin support</button>
+        <button class="btn secondary">Go to queue assistant</button>
+      </div>
+    </div>
+
+    <details class="card">
+      <summary>Appointment details</summary>
+      <div class="details-grid">
+        <div class="item"><div class="k">Patient</div><div class="v">N**** R***</div></div>
+        <div class="item"><div class="k">Phone</div><div class="v">+91 •••• •• 2841</div></div>
+        <div class="item"><div class="k">Appointment slot</div><div class="v">10:30 AM – 11:00 AM</div></div>
+        <div class="item"><div class="k">Doctor</div><div class="v">Dr. A. Sharma</div></div>
+        <div class="item"><div class="k">Department</div><div class="v">General Medicine</div></div>
+        <div class="item"><div class="k">OPD No.</div><div class="v">OPD-04</div></div>
+        <div class="item"><div class="k">Registration ID</div><div class="v">RG-882940</div></div>
+        <div class="item"><div class="k">Building</div><div class="v">Main Block</div></div>
+      </div>
+    </details>
+
+    <div class="card">
+      <div class="section-title">Quick help</div>
+
+      <div class="faq-item">
+        <div class="faq-q">What if my number is skipped?</div>
+        <div class="faq-a">Use the rejoin support button above or ask the queue assistant near the OPD room.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">Can I leave the waiting area?</div>
+        <div class="faq-a">Yes, if your queue is not close. Return when the page says “Move closer”.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">What if the doctor is delayed?</div>
+        <div class="faq-a">This page will update automatically and tell you whether to continue waiting or move later.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">What if I am in the wrong department?</div>
+        <div class="faq-a">Use “Wrong department?” in the location section or ask the help desk.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">How accurate is waiting time?</div>
+        <div class="faq-a">It is approximate and may change if consultations take longer or room assignments change.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">For caregivers / attendants</div>
+      <div class="caregiver">
+        <div class="tip">One person may track the queue while the patient rests.</div>
+        <div class="tip">Please keep reports, prescription slips, and ID ready.</div>
+        <div class="tip">You may wait in the seating zone until the page asks you to move closer.</div>
+      </div>
+    </div>
+
+    <div class="card mini-game" id="gameCard">
+      <div class="section-title">Pass a minute</div>
+      <p>A small calm break while you wait. The snake collects masks 😷</p>
+      <canvas id="game" width="260" height="260"></canvas>
+      <div class="game-controls">
+        <button class="btn secondary" onclick="startGame()">Start game</button>
+        <button class="btn secondary" onclick="hideGame()">Hide game</button>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      This page updates automatically. Please keep your phone available and your reports ready.
+    </div>
+  </div>
+
+  <script>
+    const states = {
+      waiting: {
+        statusText: "Checked In • Waiting",
+        patientsBefore: "8",
+        heroSub: "patients before you • approx. 35 mins",
+        doctorStatus: "On time",
+        room: "Room 12",
+        locRoom: "12",
+        direction: "Left wing, near pathology",
+        instructionIcon: "🪑",
+        instructionTitle: "You may wait in the seating area",
+        instructionText: "Please stay within hearing distance. Keep your reports ready.",
+        currentToken: "A-19",
+        queueLabel: "You are getting closer. Please stay available.",
+        alerts: [
+          ["⏱", "Queue moving normally", "Current consultation speed is steady."],
+          ["📢", "Please keep reports ready", "You may be called soon as the line progresses."]
+        ]
+      },
+      closer: {
+        statusText: "Move Closer",
+        patientsBefore: "3",
+        heroSub: "patients before you • approx. 12 mins",
+        doctorStatus: "On time",
+        room: "Room 12",
+        locRoom: "12",
+        direction: "Please move near consultation room",
+        instructionIcon: "🚶",
+        instructionTitle: "Please move closer now",
+        instructionText: "Stay near Room 12. Your turn is approaching.",
+        currentToken: "A-24",
+        queueLabel: "Only a few patients remain before your turn.",
+        alerts: [
+          ["📢", "Please move closer", "Your token may be called soon."],
+          ["🧾", "Keep prescription slips ready", "You may need them at entry."]
+        ]
+      },
+      serving: {
+        statusText: "Now Serving",
+        patientsBefore: "0",
+        heroSub: "It’s your turn • please proceed now",
+        doctorStatus: "Consulting",
+        room: "Cabin 5",
+        locRoom: "5",
+        direction: "Proceed to consultation room now",
+        instructionIcon: "➡️",
+        instructionTitle: "Please proceed to consultation room",
+        instructionText: "Your number is being served. Enter Cabin 5 when called.",
+        currentToken: "A-27",
+        queueLabel: "Your turn is active now.",
+        alerts: [
+          ["🩺", "Now serving A-27", "Please proceed to the consultation room."],
+          ["📍", "Cabin updated", "You are being seen in Cabin 5."]
+        ]
+      },
+      delayed: {
+        statusText: "Doctor Delayed",
+        patientsBefore: "8",
+        heroSub: "patients before you • approx. 55 mins",
+        doctorStatus: "Delayed by 20 mins",
+        room: "Room 12",
+        locRoom: "12",
+        direction: "You may continue waiting in lounge",
+        instructionIcon: "⏳",
+        instructionTitle: "Doctor delayed. You may continue waiting",
+        instructionText: "There is a temporary delay. You do not need to stand near the room.",
+        currentToken: "A-19",
+        queueLabel: "Your place in line is safe. No need to crowd near the room.",
+        alerts: [
+          ["⏳", "Doctor delayed by approx. 20 mins", "Please continue waiting in the seating area."],
+          ["📢", "Queue will resume shortly", "This page will update automatically."]
+        ]
+      },
+      changed: {
+        statusText: "Room Changed",
+        patientsBefore: "5",
+        heroSub: "patients before you • approx. 22 mins",
+        doctorStatus: "On time",
+        room: "Room 11",
+        locRoom: "11",
+        direction: "2nd floor, opposite pathology",
+        instructionIcon: "📍",
+        instructionTitle: "Your room has changed",
+        instructionText: "Please go to Room 11 instead of Room 12.",
+        currentToken: "A-22",
+        queueLabel: "Please follow the updated room information.",
+        alerts: [
+          ["📍", "Room changed from 12 to 11", "Please move to the updated consultation room."],
+          ["🧭", "Need help finding the room?", "Use the location card above."]
+        ]
+      },
+      missed: {
+        statusText: "Missed Turn • Get Help",
+        patientsBefore: "—",
+        heroSub: "Looks like you missed your call",
+        doctorStatus: "Consulting",
+        room: "Help Desk / Queue Assistant",
+        locRoom: "Help Desk",
+        direction: "Please ask queue assistant nearby",
+        instructionIcon: "🤝",
+        instructionTitle: "Don’t worry. You can rejoin",
+        instructionText: "Tap below or speak to the queue assistant for support.",
+        currentToken: "A-31",
+        queueLabel: "Your last call was missed. Support is available.",
+        alerts: [
+          ["⚠️", "Looks like your turn was missed", "Please request rejoin support."],
+          ["🤝", "Queue assistant can help", "Do not panic. Your visit can still continue."]
+        ]
+      }
+    };
+
+    function setState(state) {
+      const s = states[state];
+      document.getElementById("statusText").textContent = s.statusText;
+      document.getElementById("patientsBefore").textContent = s.patientsBefore;
+      document.getElementById("heroSub").textContent = s.heroSub;
+      document.getElementById("doctorStatus").textContent = s.doctorStatus;
+      document.getElementById("roomValue").textContent = s.room;
+      document.getElementById("locRoom").textContent = s.locRoom;
+      document.getElementById("directionValue").textContent = s.direction;
+      document.getElementById("instructionIcon").textContent = s.instructionIcon;
+      document.getElementById("instructionTitle").textContent = s.instructionTitle;
+      document.getElementById("instructionText").textContent = s.instructionText;
+      document.getElementById("currentToken").textContent = s.currentToken;
+      document.getElementById("queueLabel").textContent = s.queueLabel;
+
+      const alertsContainer = document.getElementById("alertsContainer");
+      alertsContainer.innerHTML = "";
+      s.alerts.forEach(alert => {
+        alertsContainer.innerHTML += `
+          <div class="alert">
+            <div>${alert[0]}</div>
+            <div><strong>${alert[1]}</strong>${alert[2]}</div>
+          </div>
+        `;
+      });
+
+      renderQueue(state);
+    }
+
+    function renderQueue(state) {
+      const queueVisual = document.getElementById("queueVisual");
+      queueVisual.innerHTML = "";
+
+      let nums = ["A-19","A-20","A-21","A-22","A-23","A-24","A-25","A-26","A-27"];
+      let current = document.getElementById("currentToken").textContent;
+      let you = document.getElementById("yourToken").textContent;
+
+      nums.forEach(num => {
+        const div = document.createElement("div");
+        div.className = "dot";
+
+        if (parseInt(num.split("-")[1]) < parseInt(current.split("-")[1])) {
+          div.classList.add("done");
+        }
+        if (num === current) {
+          div.classList.add("current");
+        }
+        if (num === you) {
+          div.classList.add("you");
+        }
+
+        div.textContent = num.replace("A-","");
+        queueVisual.appendChild(div);
+      });
+    }
+
+    function readAloud() {
+      const text = `
+        You are in District Civil Hospital, General Medicine OPD.
+        Your token number is A-27.
+        ${document.getElementById("heroSub").textContent}.
+        ${document.getElementById("instructionTitle").textContent}.
+        ${document.getElementById("instructionText").textContent}.
+      `;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1;
+      speechSynthesis.speak(utterance);
+    }
+
+    setInterval(() => {
+      const timeEl = document.getElementById("updatedTime");
+      timeEl.textContent = "Updated just now";
+      setTimeout(() => {
+        timeEl.textContent = "Updated 1 min ago";
+      }, 4000);
+    }, 30000);
+
+    setState("waiting");
+
+    // SNAKE GAME
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const grid = 20;
+    let count = 0;
+    let snake = { x: 160, y: 160, cells: [], maxCells: 4, dx: grid, dy: 0 };
+    let mask = { x: 320, y: 320 };
+    let gameLoop = null;
+
+    function resetGame() {
+      snake = { x: 160, y: 160, cells: [], maxCells: 4, dx: grid, dy: 0 };
+      mask = { x: 100, y: 100 };
+    }
+
+    function startGame() {
+      if (gameLoop) clearInterval(gameLoop);
+      resetGame();
+      gameLoop = setInterval(loop, 120);
+    }
+
+    function loop() {
+      requestAnimationFrame(() => {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+
+        snake.x += snake.dx;
+        snake.y += snake.dy;
+
+        if (snake.x < 0) snake.x = canvas.width - grid;
+        else if (snake.x >= canvas.width) snake.x = 0;
+
+        if (snake.y < 0) snake.y = canvas.height - grid;
+        else if (snake.y >= canvas.height) snake.y = 0;
+
+        snake.cells.unshift({ x: snake.x, y: snake.y });
+        if (snake.cells.length > snake.maxCells) snake.cells.pop();
+
+        // draw mask
+        ctx.fillStyle = "#888";
+        ctx.fillRect(mask.x, mask.y, grid - 2, grid - 2);
+        ctx.fillStyle = "#f4f4f4";
+        ctx.fillRect(mask.x + 4, mask.y + 7, 10, 6);
+
+        // draw snake
+        ctx.fillStyle = "#333";
+        snake.cells.forEach((cell, index) => {
+          ctx.fillRect(cell.x, cell.y, grid - 2, grid - 2);
+
+          if (cell.x === mask.x && cell.y === mask.y) {
+            snake.maxCells++;
+            mask.x = Math.floor(Math.random() * 13) * grid;
+            mask.y = Math.floor(Math.random() * 13) * grid;
+          }
+
+          for (let i = index + 1; i < snake.cells.length; i++) {
+            if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+              resetGame();
+            }
+          }
+        });
+      });
+    }
+
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "ArrowLeft" && snake.dx === 0) {
+        snake.dx = -grid; snake.dy = 0;
+      } else if (e.key === "ArrowUp" && snake.dy === 0) {
+        snake.dy = -grid; snake.dx = 0;
+      } else if (e.key === "ArrowRight" && snake.dx === 0) {
+        snake.dx = grid; snake.dy = 0;
+      } else if (e.key === "ArrowDown" && snake.dy === 0) {
+        snake.dy = grid; snake.dx = 0;
+      }
+    });
+
+    function hideGame() {
+      document.getElementById("gameCard").style.display = "none";
+    }
+  </script>
+</body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hospital OPD Queue Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f7fa;
+      --card: #ffffff;
+      --line: #d7e0e8;
+      --soft: #eef4f8;
+      --soft-2: #f8fbfd;
+      --text: #1c2a36;
+      --muted: #6c7a86;
+      --accent: #6f8fa8;
+      --accent-2: #89a9bf;
+      --success: #7fa7a2;
+      --warning: #d6b276;
+      --danger: #c99292;
+      --blue: #79a7d8;
+      --teal: #8eb7b1;
+      --rose: #d3a4a4;
+      --amber: #d9b77a;
+      --shadow: 0 12px 28px rgba(40, 60, 80, 0.08);
+      --shadow-soft: 0 8px 20px rgba(40, 60, 80, 0.05);
+      --radius: 22px;
+      --radius-sm: 14px;
+      --transition: 0.25s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to bottom, #f6f9fb 0%, #f2f6f9 100%);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      gap: 10px;
+    }
+
+    .topbar-right {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .small-btn {
+      font-size: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(6px);
+      padding: 9px 12px;
+      border-radius: 999px;
+      color: var(--text);
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .small-btn:hover {
+      transform: translateY(-1px);
+      background: white;
+    }
+
+    .small-btn:active {
+      transform: scale(0.98);
+    }
+
+    .card {
+      background: rgba(255,255,255,0.92);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      transform: translateY(-1px);
+    }
+
+    .header-card {
+      padding: 18px;
+    }
+
+    .hospital-row {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .logo {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      border: 1px dashed #b8c7d3;
+      background: linear-gradient(135deg, #edf5fb, #f7fbfe);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--muted);
+      flex-shrink: 0;
+      font-weight: 700;
+    }
+
+    .hospital-info h1 {
+      font-size: 20px;
+      margin: 0 0 4px;
+      line-height: 1.2;
+    }
+
+    .hospital-info p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      padding: 8px 12px;
+      background: #f3f8fb;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--text);
+      border: 1px solid var(--line);
+      transition: var(--transition);
+    }
+
+    .chip.clickable {
+      cursor: pointer;
+    }
+
+    .chip.clickable:hover {
+      background: #eaf3f9;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: 0.1px;
+    }
+
+    .status-card {
+      padding: 20px;
+      border: 2px solid #d9e5ef;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+    }
+
+    .status-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #eef5fb;
+      border: 1px solid #d4e3ef;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .pulse {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--accent);
+      animation: pulse 1.6s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.35); opacity: 0.4; }
+      100% { transform: scale(1); opacity: 0.9; }
+    }
+
+    .updated {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .hero-number {
+      font-size: 48px;
+      font-weight: 800;
+      margin: 10px 0 2px;
+      letter-spacing: -1px;
+      transition: var(--transition);
+    }
+
+    .hero-sub {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 18px;
+      transition: var(--transition);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .metric {
+      background: linear-gradient(180deg, #f5f9fc, #eef5f9);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      transition: var(--transition);
+    }
+
+    .metric:hover {
+      transform: translateY(-1px);
+    }
+
+    .metric .label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .metric .value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .info-box {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: white;
+      transition: var(--transition);
+    }
+
+    .info-box .label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .info-box .value {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .queue-visual {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 14px;
+      background: #f1f7fb;
+      border: 1px solid #d8e6ef;
+      border-radius: 18px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+    }
+
+    .dot {
+      width: 38px;
+      height: 38px;
+      min-width: 38px;
+      border-radius: 999px;
+      border: 1px solid #cfdde8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      background: white;
+      color: var(--muted);
+      position: relative;
+      transition: var(--transition);
+      font-weight: 600;
+    }
+
+    .dot.done {
+      background: #dce8f1;
+      color: #33546b;
+      border-color: #c4d7e5;
+    }
+
+    .dot.current {
+      background: #84a9c4;
+      color: white;
+      font-weight: 700;
+      transform: scale(1.08);
+      box-shadow: 0 8px 18px rgba(90,130,160,0.2);
+    }
+
+    .dot.you {
+      border: 2px solid #5c7f99;
+      font-weight: 800;
+      color: #173046;
+      background: #eef6fb;
+    }
+
+    .dot.you::after {
+      content: "YOU";
+      position: absolute;
+      top: -20px;
+      font-size: 10px;
+      font-weight: 800;
+      color: #5b7f99;
+      background: #eef5fb;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid #d5e3ed;
+    }
+
+    .dot-label {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+      transition: var(--transition);
+    }
+
+    .instruction {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .icon-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 16px;
+      background: #eef5fa;
+      border: 1px solid #d7e4ed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .instruction h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+
+    .instruction p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, #7f9eb8, #6d8da6);
+      color: white;
+      box-shadow: 0 10px 20px rgba(90,120,150,0.18);
+    }
+
+    .btn.secondary {
+      background: #f2f7fa;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .alerts {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .alert {
+      background: #f4f9fc;
+      border: 1px solid #d8e5ee;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 14px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      animation: fadeUp 0.35s ease;
+    }
+
+    .alert strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: white;
+      margin-bottom: 10px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .details-grid .item {
+      background: #f4f8fb;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .details-grid .item .k {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .details-grid .item .v {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .faq-item {
+      border-top: 1px solid var(--line);
+      padding: 12px 0;
+    }
+
+    .faq-item:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .faq-q {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 5px;
+      cursor: pointer;
+    }
+
+    .faq-a {
+      font-size: 13px;
+      color: var(--muted);
+      display: none;
+      padding-top: 4px;
+    }
+
+    .faq-item.active .faq-a {
+      display: block;
+    }
+
+    .caregiver {
+      font-size: 14px;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .caregiver .tip {
+      padding: 12px 14px;
+      background: #f3f8fb;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    .state-switcher {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 14px;
+    }
+
+    .state-btn {
+      white-space: nowrap;
+      border: 1px solid var(--line);
+      background: white;
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .state-btn:hover {
+      background: #eef5fa;
+    }
+
+    .state-btn.active {
+      background: #dfeef8;
+      border-color: #bdd7e8;
+      color: #26445b;
+      font-weight: 700;
+    }
+
+    .mini-game {
+      text-align: center;
+    }
+
+    .mini-game p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+      margin-bottom: 10px;
+    }
+
+    .score-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .score-pill {
+      background: #f0f6fb;
+      border: 1px solid #d7e5ee;
+      border-radius: 999px;
+      padding: 8px 12px;
+    }
+
+    canvas {
+      background: #edf5fb;
+      border: 2px solid #d7e5ee;
+      border-radius: 18px;
+      display: block;
+      margin: 0 auto 12px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);
+      touch-action: none;
+    }
+
+    .game-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .mobile-controls {
+      display: grid;
+      grid-template-columns: 60px 60px 60px;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 6px;
+    }
+
+    .mobile-controls button {
+      height: 48px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #f2f7fa;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .mobile-controls .blank {
+      visibility: hidden;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 8px 10px 30px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(30px);
+      background: rgba(28,42,54,0.95);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.3s ease;
+      z-index: 1000;
+      max-width: 88%;
+      text-align: center;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,25,35,0.45);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 999;
+      padding: 0;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 520px;
+      background: #fff;
+      border-radius: 26px 26px 0 0;
+      padding: 22px 18px 24px;
+      box-shadow: 0 -18px 40px rgba(0,0,0,0.18);
+      animation: slideUp 0.28s ease;
+      max-height: 88vh;
+      overflow-y: auto;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-handle {
+      width: 56px;
+      height: 6px;
+      border-radius: 999px;
+      background: #d5dfe7;
+      margin: 0 auto 16px;
+    }
+
+    .modal h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    .modal p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .modal-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .modal-item {
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #f5f9fc;
+    }
+
+    .modal-item strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .banner {
+      display: none;
+      background: #fdf4e6;
+      border: 1px solid #efd6a5;
+      color: #6a542d;
+      padding: 14px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      margin-bottom: 14px;
+      animation: fadeUp 0.3s ease;
+    }
+
+    .banner.show {
+      display: block;
+    }
+
+    .speaking {
+      outline: 2px solid #9fc2df;
+      background: #eef7ff;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        max-width: 900px;
+      }
+
+      .two-col {
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        gap: 14px;
+      }
+
+      .three-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      .modal-backdrop {
+        align-items: center;
+        padding: 20px;
+      }
+
+      .modal {
+        border-radius: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="topbar">
+      <button class="small-btn" id="languageBtn">🌐 English</button>
+      <div class="topbar-right">
+        <button class="small-btn" id="readBtn" onclick="toggleReadAloud()">🔊 Read aloud</button>
+        <button class="small-btn" onclick="refreshNow()">⟳ Refresh now</button>
+        <button class="small-btn" onclick="openModal('help')">❓ Need Help?</button>
+      </div>
+    </div>
+
+    <div class="banner" id="topBanner"></div>
+
+    <div class="state-switcher" id="stateSwitcher">
+      <button class="state-btn active" onclick="setState('waiting', true)">Normal Waiting</button>
+      <button class="state-btn" onclick="setState('closer', true)">Move Closer</button>
+      <button class="state-btn" onclick="setState('serving', true)">Now Serving</button>
+      <button class="state-btn" onclick="setState('delayed', true)">Doctor Delayed</button>
+      <button class="state-btn" onclick="setState('changed', true)">Room Changed</button>
+      <button class="state-btn" onclick="setState('missed', true)">Missed Turn</button>
+    </div>
+
+    <div class="card header-card">
+      <div class="hospital-row">
+        <div class="logo">LOGO</div>
+        <div class="hospital-info">
+          <h1>District Civil Hospital</h1>
+          <p>General Medicine OPD • Thursday, 2 April 2026</p>
+        </div>
+      </div>
+
+      <div class="chip-row">
+        <div class="chip">Dr. A. Sharma</div>
+        <div class="chip">Follow-up Visit</div>
+        <div class="chip clickable" onclick="copyBookingRef()">Ref: <span id="bookingRef">GH-2048-A</span></div>
+        <div class="chip">Patient: N***</div>
+      </div>
+    </div>
+
+    <div class="card status-card" id="statusCard">
+      <div class="status-top">
+        <div class="status-badge" id="statusBadge">
+          <div class="pulse"></div>
+          <span id="statusText">Checked In • Waiting</span>
+        </div>
+        <div class="updated" id="updatedTime">Updated 1 min ago</div>
+      </div>
+
+      <div class="hero-number" id="patientsBefore">8</div>
+      <div class="hero-sub" id="heroSub">patients before you • approx. 35 mins</div>
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="label">Your token</div>
+          <div class="value" id="yourToken">A-27</div>
+        </div>
+        <div class="metric">
+          <div class="label">Now serving</div>
+          <div class="value" id="currentToken">A-19</div>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-box">
+          <div class="label">Doctor status</div>
+          <div class="value" id="doctorStatus">On time</div>
+        </div>
+        <div class="info-box">
+          <div class="label">Room / cabin</div>
+          <div class="value" id="roomValue">Room 12</div>
+        </div>
+        <div class="info-box">
+          <div class="label">Floor / block</div>
+          <div class="value" id="floorValue">2nd Floor, Block B</div>
+        </div>
+        <div class="info-box">
+          <div class="label">Direction</div>
+          <div class="value" id="directionValue">Left wing, near pathology</div>
+        </div>
+      </div>
+
+      <div class="queue-visual" id="queueVisual"></div>
+      <div class="dot-label" id="queueLabel">You are getting closer. Please stay available.</div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="section-title">What you should do now</div>
+        <div class="instruction">
+          <div class="icon-circle" id="instructionIcon">🪑</div>
+          <div>
+            <h3 id="instructionTitle">You may wait in the seating area</h3>
+            <p id="instructionText">Please stay within hearing distance. Keep your reports ready.</p>
+          </div>
+        </div>
+        <div class="action-row">
+          <button class="btn primary" onclick="openModal('directions')">View directions</button>
+          <button class="btn secondary" onclick="openModal('helpdesk')">Ask help desk</button>
+          <button class="btn secondary" onclick="markPresent()">I am nearby</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Location</div>
+        <div class="details-grid">
+          <div class="item">
+            <div class="k">Department</div>
+            <div class="v">General Medicine OPD</div>
+          </div>
+          <div class="item">
+            <div class="k">Room</div>
+            <div class="v" id="locRoom">12</div>
+          </div>
+          <div class="item">
+            <div class="k">Floor</div>
+            <div class="v">2nd Floor</div>
+          </div>
+          <div class="item">
+            <div class="k">Nearest landmark</div>
+            <div class="v">Next to Pathology</div>
+          </div>
+        </div>
+        <div class="action-row">
+          <button class="btn secondary" onclick="openModal('directions')">How to reach</button>
+          <button class="btn secondary" onclick="openModal('wrongDept')">Wrong department?</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Live alerts & updates</div>
+      <div class="alerts" id="alertsContainer">
+        <div class="alert">
+          <div>⏱</div>
+          <div><strong>Queue moving normally</strong>Current consultation speed is steady.</div>
+        </div>
+        <div class="alert">
+          <div>📢</div>
+          <div><strong>Please keep reports ready</strong>You may be called soon as the line progresses.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Missed your turn?</div>
+      <div class="instruction">
+        <div class="icon-circle">🤝</div>
+        <div>
+          <h3 style="margin-bottom:6px;">We can help you rejoin</h3>
+          <p>Went to the washroom, got confused, or missed the audio call? Tap below for assistance.</p>
+        </div>
+      </div>
+      <div class="action-row">
+        <button class="btn primary" onclick="openModal('rejoin')">Request rejoin support</button>
+        <button class="btn secondary" onclick="openModal('queueAssistant')">Go to queue assistant</button>
+      </div>
+    </div>
+
+    <details class="card" id="appointmentDetails">
+      <summary>Appointment details</summary>
+      <div class="details-grid">
+        <div class="item"><div class="k">Patient</div><div class="v">N**** R***</div></div>
+        <div class="item"><div class="k">Phone</div><div class="v">+91 •••• •• 2841</div></div>
+        <div class="item"><div class="k">Appointment slot</div><div class="v">10:30 AM – 11:00 AM</div></div>
+        <div class="item"><div class="k">Doctor</div><div class="v">Dr. A. Sharma</div></div>
+        <div class="item"><div class="k">Department</div><div class="v">General Medicine</div></div>
+        <div class="item"><div class="k">OPD No.</div><div class="v">OPD-04</div></div>
+        <div class="item"><div class="k">Registration ID</div><div class="v">RG-882940</div></div>
+        <div class="item"><div class="k">Building</div><div class="v">Main Block</div></div>
+      </div>
+    </details>
+
+    <div class="card">
+      <div class="section-title">Quick help</div>
+
+      <div class="faq-item">
+        <div class="faq-q">What if my number is skipped?</div>
+        <div class="faq-a">Use the rejoin support button above or ask the queue assistant near the OPD room.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">Can I leave the waiting area?</div>
+        <div class="faq-a">Yes, if your queue is not close. Return when the page says “Move closer”.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">What if the doctor is delayed?</div>
+        <div class="faq-a">This page will update automatically and tell you whether to continue waiting or move later.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">What if I am in the wrong department?</div>
+        <div class="faq-a">Use “Wrong department?” in the location section or ask the help desk.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">How accurate is waiting time?</div>
+        <div class="faq-a">It is approximate and may change if consultations take longer or room assignments change.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">For caregivers / attendants</div>
+      <div class="caregiver">
+        <div class="tip">One person may track the queue while the patient rests.</div>
+        <div class="tip">Please keep reports, prescription slips, and ID ready.</div>
+        <div class="tip">You may wait in the seating zone until the page asks you to move closer.</div>
+      </div>
+    </div>
+
+    <div class="card mini-game" id="gameCard">
+      <div class="section-title">Pass a minute</div>
+      <p>A small calm break while you wait. The snake collects hospital masks.</p>
+
+      <div class="score-row">
+        <div class="score-pill">Score: <span id="score">0</span></div>
+        <div class="score-pill">Status: <span id="gameStatus">Ready</span></div>
+      </div>
+
+      <canvas id="game" width="260" height="260"></canvas>
+
+      <div class="game-controls">
+        <button class="btn secondary" onclick="startGame()">Start game</button>
+        <button class="btn secondary" onclick="pauseGame()">Pause</button>
+        <button class="btn secondary" onclick="restartGame()">Restart</button>
+        <button class="btn secondary" onclick="hideGame()">Hide game</button>
+      </div>
+
+      <div class="mobile-controls">
+        <button class="blank"></button>
+        <button onclick="setDirection('up')">⬆️</button>
+        <button class="blank"></button>
+        <button onclick="setDirection('left')">⬅️</button>
+        <button onclick="setDirection('down')">⬇️</button>
+        <button onclick="setDirection('right')">➡️</button>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      This page updates automatically. Please keep your phone available and your reports ready.
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- MODAL -->
+  <div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+    <div class="modal" id="modalContent" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div id="modalInner"></div>
+    </div>
+  </div>
+
+  <script>
+    // --------------------------
+    // APP STATE
+    // --------------------------
+    let currentState = "waiting";
+    let currentLanguage = "English";
+    let isSpeaking = false;
+    let utterance = null;
+
+    const states = {
+      waiting: {
+        statusText: "Checked In • Waiting",
+        patientsBefore: "8",
+        waitMinutes: "35",
+        heroSub: "patients before you • approx. 35 mins",
+        doctorStatus: "On time",
+        room: "Room 12",
+        locRoom: "12",
+        direction: "Left wing, near pathology",
+        instructionIcon: "🪑",
+        instructionTitle: "You may wait in the seating area",
+        instructionText: "Please stay within hearing distance. Keep your reports ready.",
+        currentToken: "A-19",
+        queueLabel: "You are getting closer. Please stay available.",
+        badgeBg: "#eef5fb",
+        badgeBorder: "#d4e3ef",
+        pulse: "#7e9db7",
+        banner: "",
+        alerts: [
+          ["⏱", "Queue moving normally", "Current consultation speed is steady."],
+          ["📢", "Please keep reports ready", "You may be called soon as the line progresses."]
+        ]
+      },
+      closer: {
+        statusText: "Move Closer",
+        patientsBefore: "3",
+        waitMinutes: "12",
+        heroSub: "patients before you • approx. 12 mins",
+        doctorStatus: "On time",
+        room: "Room 12",
+        locRoom: "12",
+        direction: "Please move near consultation room",
+        instructionIcon: "🚶",
+        instructionTitle: "Please move closer now",
+        instructionText: "Stay near Room 12. Your turn is approaching.",
+        currentToken: "A-24",
+        queueLabel: "Only a few patients remain before your turn.",
+        badgeBg: "#eef7f6",
+        badgeBorder: "#d4e7e4",
+        pulse: "#7fa7a2",
+        banner: "",
+        alerts: [
+          ["📢", "Please move closer", "Your token may be called soon."],
+          ["🧾", "Keep prescription slips ready", "You may need them at entry."]
+        ]
+      },
+      serving: {
+        statusText: "Now Serving",
+        patientsBefore: "0",
+        waitMinutes: "0",
+        heroSub: "It’s your turn • please proceed now",
+        doctorStatus: "Consulting",
+        room: "Cabin 5",
+        locRoom: "5",
+        direction: "Proceed to consultation room now",
+        instructionIcon: "➡️",
+        instructionTitle: "Please proceed to consultation room",
+        instructionText: "Your number is being served. Enter Cabin 5 when called.",
+        currentToken: "A-27",
+        queueLabel: "Your turn is active now.",
+        badgeBg: "#edf6f1",
+        badgeBorder: "#d4e6db",
+        pulse: "#7fa78d",
+        banner: "Your token is now being served. Please proceed to Cabin 5.",
+        alerts: [
+          ["🩺", "Now serving A-27", "Please proceed to the consultation room."],
+          ["📍", "Cabin updated", "You are being seen in Cabin 5."]
+        ]
+      },
+      delayed: {
+        statusText: "Doctor Delayed",
+        patientsBefore: "8",
+        waitMinutes: "55",
+        heroSub: "patients before you • approx. 55 mins",
+        doctorStatus: "Delayed by 20 mins",
+        room: "Room 12",
+        locRoom: "12",
+        direction: "You may continue waiting in lounge",
+        instructionIcon: "⏳",
+        instructionTitle: "Doctor delayed. You may continue waiting",
+        instructionText: "There is a temporary delay. You do not need to stand near the room.",
+        currentToken: "A-19",
+        queueLabel: "Your place in line is safe. No need to crowd near the room.",
+        badgeBg: "#fdf6ea",
+        badgeBorder: "#efdcb4",
+        pulse: "#d1aa6a",
+        banner: "Doctor delayed by approx. 20 mins. Your queue position is safe.",
+        alerts: [
+          ["⏳", "Doctor delayed by approx. 20 mins", "Please continue waiting in the seating area."],
+          ["📢", "Queue will resume shortly", "This page will update automatically."]
+        ]
+      },
+      changed: {
+        statusText: "Room Changed",
+        patientsBefore: "5",
+        waitMinutes: "22",
+        heroSub: "patients before you • approx. 22 mins",
+        doctorStatus: "On time",
+        room: "Room 11",
+        locRoom: "11",
+        direction: "2nd floor, opposite pathology",
+        instructionIcon: "📍",
+        instructionTitle: "Your room has changed",
+        instructionText: "Please go to Room 11 instead of Room 12.",
+        currentToken: "A-22",
+        queueLabel: "Please follow the updated room information.",
+        badgeBg: "#eef4fb",
+        badgeBorder: "#d7e3f1",
+        pulse: "#7d98be",
+        banner: "Room changed from Room 12 to Room 11. Please follow updated directions.",
+        alerts: [
+          ["📍", "Room changed from 12 to 11", "Please move to the updated consultation room."],
+          ["🧭", "Need help finding the room?", "Use the location card above."]
+        ]
+      },
+      missed: {
+        statusText: "Missed Turn • Get Help",
+        patientsBefore: "—",
+        waitMinutes: "—",
+        heroSub: "Looks like you missed your call",
+        doctorStatus: "Consulting",
+        room: "Help Desk / Queue Assistant",
+        locRoom: "Help Desk",
+        direction: "Please ask queue assistant nearby",
+        instructionIcon: "🤝",
+        instructionTitle: "Don’t worry. You can rejoin",
+        instructionText: "Tap below or speak to the queue assistant for support.",
+        currentToken: "A-31",
+        queueLabel: "Your last call was missed. Support is available.",
+        badgeBg: "#fbefef",
+        badgeBorder: "#eed8d8",
+        pulse: "#c99292",
+        banner: "Looks like your token was missed. Rejoin support is available.",
+        alerts: [
+          ["⚠️", "Looks like your turn was missed", "Please request rejoin support."],
+          ["🤝", "Queue assistant can help", "Do not panic. Your visit can still continue."]
+        ]
+      }
+    };
+
+    // --------------------------
+    // UI FUNCTIONS
+    // --------------------------
+    function setState(state, showToast = false) {
+      currentState = state;
+      const s = states[state];
+
+      document.getElementById("statusText").textContent = s.statusText;
+      document.getElementById("patientsBefore").textContent = s.patientsBefore;
+      document.getElementById("heroSub").textContent = s.heroSub;
+      document.getElementById("doctorStatus").textContent = s.doctorStatus;
+      document.getElementById("roomValue").textContent = s.room;
+      document.getElementById("locRoom").textContent = s.locRoom;
+      document.getElementById("directionValue").textContent = s.direction;
+      document.getElementById("instructionIcon").textContent = s.instructionIcon;
+      document.getElementById("instructionTitle").textContent = s.instructionTitle;
+      document.getElementById("instructionText").textContent = s.instructionText;
+      document.getElementById("currentToken").textContent = s.currentToken;
+      document.getElementById("queueLabel").textContent = s.queueLabel;
+
+      const statusBadge = document.getElementById("statusBadge");
+      statusBadge.style.background = s.badgeBg;
+      statusBadge.style.borderColor = s.badgeBorder;
+      document.querySelector(".pulse").style.background = s.pulse;
+
+      // state button active
+      document.querySelectorAll(".state-btn").forEach(btn => btn.classList.remove("active"));
+      const stateMap = ["waiting","closer","serving","delayed","changed","missed"];
+      const index = stateMap.indexOf(state);
+      if (index !== -1) {
+        document.querySelectorAll(".state-btn")[index].classList.add("active");
+      }
+
+      // alerts
+      const alertsContainer = document.getElementById("alertsContainer");
+      alertsContainer.innerHTML = "";
+      s.alerts.forEach(alert => {
+        alertsContainer.innerHTML += `
+          <div class="alert">
+            <div>${alert[0]}</div>
+            <div><strong>${alert[1]}</strong>${alert[2]}</div>
+          </div>
+        `;
+      });
+
+      // top banner
+      const banner = document.getElementById("topBanner");
+      if (s.banner) {
+        banner.textContent = s.banner;
+        banner.classList.add("show");
+      } else {
+        banner.classList.remove("show");
+      }
+
+      renderQueue();
+      updateTimestamp();
+
+      if (showToast) {
+        showToastMessage(`Status updated: ${s.statusText}`);
+      }
+    }
+
+    function renderQueue() {
+      const queueVisual = document.getElementById("queueVisual");
+      queueVisual.innerHTML = "";
+
+      let nums = ["A-19","A-20","A-21","A-22","A-23","A-24","A-25","A-26","A-27"];
+      let current = document.getElementById("currentToken").textContent;
+      let you = document.getElementById("yourToken").textContent;
+
+      nums.forEach(num => {
+        const div = document.createElement("div");
+        div.className = "dot";
+
+        if (parseInt(num.split("-")[1]) < parseInt(current.split("-")[1])) {
+          div.classList.add("done");
+        }
+        if (num === current) {
+          div.classList.add("current");
+        }
+        if (num === you) {
+          div.classList.add("you");
+        }
+
+        div.textContent = num.replace("A-","");
+
+        queueVisual.appendChild(div);
+
+        if (num === you) {
+          setTimeout(() => {
+            div.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+          }, 150);
+        }
+      });
+    }
+
+    function updateTimestamp() {
+      document.getElementById("updatedTime").textContent = "Updated just now";
+      setTimeout(() => {
+        document.getElementById("updatedTime").textContent = "Updated 1 min ago";
+      }, 3500);
+    }
+
+    function refreshNow() {
+      updateTimestamp();
+      showToastMessage("Queue refreshed");
+    }
+
+    function markPresent() {
+      showToastMessage("Marked as nearby");
+    }
+
+    function copyBookingRef() {
+      const ref = document.getElementById("bookingRef").textContent;
+      navigator.clipboard.writeText(ref).then(() => {
+        showToastMessage("Booking reference copied");
+      }).catch(() => {
+        showToastMessage("Booking reference: " + ref);
+      });
+    }
+
+    function showToastMessage(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toast.hideTimeout);
+      toast.hideTimeout = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2400);
+    }
+
+    // --------------------------
+    // LANGUAGE SWITCHER
+    // --------------------------
+    const languageBtn = document.getElementById("languageBtn");
+    const languages = ["English", "हिन्दी", "বাংলা"];
+    let languageIndex = 0;
+
+    languageBtn.addEventListener("click", () => {
+      languageIndex = (languageIndex + 1) % languages.length;
+      currentLanguage = languages[languageIndex];
+      languageBtn.textContent = `🌐 ${currentLanguage}`;
+      showToastMessage(`Language switched to ${currentLanguage}`);
+    });
+
+    // --------------------------
+    // READ ALOUD
+    // --------------------------
+    function toggleReadAloud() {
+      const btn = document.getElementById("readBtn");
+
+      if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+        isSpeaking = false;
+        btn.classList.remove("speaking");
+        btn.textContent = "🔊 Read aloud";
+        showToastMessage("Voice stopped");
+        return;
+      }
+
+      const yourToken = document.getElementById("yourToken").textContent;
+      const currentToken = document.getElementById("currentToken").textContent;
+      const patientsBefore = document.getElementById("patientsBefore").textContent;
+      const waitTime = states[currentState].waitMinutes;
+      const instruction = document.getElementById("instructionTitle").textContent;
+      const room = document.getElementById("roomValue").textContent;
+
+      const text = `
+        Your token number is ${yourToken}.
+        Currently serving ${currentToken}.
+        There are ${patientsBefore} patients before you.
+        Approximate waiting time is ${waitTime} minutes.
+        ${instruction}. ${room}.
+      `;
+
+      utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      utterance.lang = "en-IN";
+
+      utterance.onstart = () => {
+        isSpeaking = true;
+        btn.classList.add("speaking");
+        btn.textContent = "⏹ Stop voice";
+      };
+
+      utterance.onend = () => {
+        isSpeaking = false;
+        btn.classList.remove("speaking");
+        btn.textContent = "🔊 Read aloud";
+      };
+
+      speechSynthesis.speak(utterance);
+    }
+
+    // --------------------------
+    // FAQ ACCORDION
+    // --------------------------
+    document.querySelectorAll(".faq-q").forEach(q => {
+      q.addEventListener("click", () => {
+        q.parentElement.classList.toggle("active");
+      });
+    });
+
+    // --------------------------
+    // MODALS
+    // --------------------------
+    const modalData = {
+      help: {
+        title: "Need help?",
+        desc: "If you are confused, in pain, or not sure what to do next, support is available.",
+        items: [
+          ["Help desk counter", "Ground floor near registration area."],
+          ["Queue assistant", "Usually available near the OPD waiting area."],
+          ["If you feel unwell", "Please inform the nearest staff member immediately."],
+          ["If you are confused", "Show this page or your registration slip."]
+        ],
+        actions: [
+          ["Call attendant", "showToastMessage('Attendant request noted')"],
+          ["Close", "closeModal()"]
+        ]
+      },
+      directions: {
+        title: "How to reach your room",
+        desc: "Simple directions to help you avoid getting lost.",
+        items: [
+          ["Go to 2nd Floor", "Use stairs or lift near the registration hall."],
+          ["Turn left", "Follow the General Medicine signboard."],
+          ["Look for Pathology", "Your room is near the pathology section."],
+          ["Destination", "Proceed to Room / Cabin shown on your status card."]
+        ],
+        actions: [
+          ["I found it", "showToastMessage('Good. Stay nearby.')"],
+          ["Close", "closeModal()"]
+        ]
+      },
+      helpdesk: {
+        title: "Help desk support",
+        desc: "If you need guidance, approach the help desk with your registration slip.",
+        items: [
+          ["When to ask", "If room number changed or you are unsure where to go."],
+          ["What to show", "Show your booking reference or OPD slip."],
+          ["Where it is", "Near main registration and patient inquiry area."]
+        ],
+        actions: [
+          ["Okay", "closeModal()"]
+        ]
+      },
+      wrongDept: {
+        title: "You may be in the wrong department",
+        desc: "This happens often in crowded hospitals. Do not worry.",
+        items: [
+          ["Check your slip", "Match the department name with this page."],
+          ["Show your registration", "Staff can redirect you faster if you show your slip."],
+          ["Ask help desk", "Go to the nearest help desk if unsure."]
+        ],
+        actions: [
+          ["Go to help desk", "showToastMessage('Please confirm at help desk')"],
+          ["Close", "closeModal()"]
+        ]
+      },
+      rejoin: {
+        title: "Request rejoin support",
+        desc: "If you missed your turn, you may still be able to continue depending on hospital policy.",
+        items: [
+          ["Stay nearby", "Do not leave after requesting support."],
+          ["Show your token", "Keep your queue page or slip ready."],
+          ["Wait for confirmation", "A queue assistant may guide you."]
+        ],
+        actions: [
+          ["Request support", "showToastMessage('Rejoin support requested')"],
+          ["Close", "closeModal()"]
+        ]
+      },
+      queueAssistant: {
+        title: "Queue assistant",
+        desc: "The queue assistant helps patients who missed their turn or need guidance.",
+        items: [
+          ["Where to find", "Usually seated near the OPD door or waiting area."],
+          ["What they help with", "Missed turn, confusion, room changes, and line guidance."],
+          ["What to carry", "Your OPD slip or booking reference."]
+        ],
+        actions: [
+          ["Okay", "closeModal()"]
+        ]
+      }
+    };
+
+    function openModal(type) {
+      const data = modalData[type];
+      const modalInner = document.getElementById("modalInner");
+
+      let itemsHTML = data.items.map(item => `
+        <div class="modal-item">
+          <strong>${item[0]}</strong>
+          <div>${item[1]}</div>
+        </div>
+      `).join("");
+
+      let actionsHTML = data.actions.map(action => `
+        <button class="btn ${action[0].toLowerCase().includes('close') || action[0].toLowerCase().includes('okay') ? 'secondary' : 'primary'}" onclick="${action[1]}">${action[0]}</button>
+      `).join("");
+
+      modalInner.innerHTML = `
+        <h3>${data.title}</h3>
+        <p>${data.desc}</p>
+        <div class="modal-list">${itemsHTML}</div>
+        <div class="modal-actions">${actionsHTML}</div>
+      `;
+
+      document.getElementById("modalBackdrop").classList.add("show");
+    }
+
+    function closeModal(event) {
+      if (!event || event.target.id === "modalBackdrop") {
+        document.getElementById("modalBackdrop").classList.remove("show");
+      }
+    }
+
+    // --------------------------
+    // AUTO TIMESTAMP
+    // --------------------------
+    setInterval(() => {
+      document.getElementById("updatedTime").textContent = "Updated just now";
+      setTimeout(() => {
+        document.getElementById("updatedTime").textContent = "Updated 1 min ago";
+      }, 4000);
+    }, 30000);
+
+    // --------------------------
+    // SNAKE GAME
+    // --------------------------
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const grid = 20;
+    const tileCount = canvas.width / grid;
+
+    let snake = [];
+    let direction = { x: 1, y: 0 };
+    let nextDirection = { x: 1, y: 0 };
+    let food = { x: 5, y: 5 };
+    let score = 0;
+    let gameInterval = null;
+    let gameRunning = false;
+    let gamePaused = false;
+
+    function initGame() {
+      snake = [
+        { x: 8, y: 8 },
+        { x: 7, y: 8 },
+        { x: 6, y: 8 }
+      ];
+      direction = { x: 1, y: 0 };
+      nextDirection = { x: 1, y: 0 };
+      score = 0;
+      placeFood();
+      updateScore();
+      drawGame();
+      document.getElementById("gameStatus").textContent = "Ready";
+    }
+
+    function placeFood() {
+      let valid = false;
+      while (!valid) {
+        food.x = Math.floor(Math.random() * tileCount);
+        food.y = Math.floor(Math.random() * tileCount);
+        valid = !snake.some(seg => seg.x === food.x && seg.y === food.y);
+      }
+    }
+
+    function startGame() {
+      if (gameRunning && !gamePaused) return;
+      if (!gameRunning) initGame();
+
+      clearInterval(gameInterval);
+      gameRunning = true;
+      gamePaused = false;
+      document.getElementById("gameStatus").textContent = "Playing";
+      gameInterval = setInterval(gameLoop, 140);
+    }
+
+    function pauseGame() {
+      if (!gameRunning) return;
+      gamePaused = !gamePaused;
+
+      if (gamePaused) {
+        clearInterval(gameInterval);
+        document.getElementById("gameStatus").textContent = "Paused";
+        showToastMessage("Game paused");
+      } else {
+        gameInterval = setInterval(gameLoop, 140);
+        document.getElementById("gameStatus").textContent = "Playing";
+        showToastMessage("Game resumed");
+      }
+    }
+
+    function restartGame() {
+      clearInterval(gameInterval);
+      gameRunning = false;
+      gamePaused = false;
+      initGame();
+      startGame();
+      showToastMessage("Game restarted");
+    }
+
+    function gameOver() {
+      clearInterval(gameInterval);
+      gameRunning = false;
+      gamePaused = false;
+      document.getElementById("gameStatus").textContent = "Game Over";
+      showToastMessage("Game over. Tap restart.");
+    }
+
+    function setDirection(dir) {
+      if (dir === "up" && direction.y !== 1) nextDirection = { x: 0, y: -1 };
+      if (dir === "down" && direction.y !== -1) nextDirection = { x: 0, y: 1 };
+      if (dir === "left" && direction.x !== 1) nextDirection = { x: -1, y: 0 };
+      if (dir === "right" && direction.x !== -1) nextDirection = { x: 1, y: 0 };
+    }
+
+    document.addEventListener("keydown", function(e) {
+      if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) {
+        e.preventDefault();
+      }
+
+      if (e.key === "ArrowLeft") setDirection("left");
+      else if (e.key === "ArrowUp") setDirection("up");
+      else if (e.key === "ArrowRight") setDirection("right");
+      else if (e.key === "ArrowDown") setDirection("down");
+    });
+
+    function gameLoop() {
+      direction = { ...nextDirection };
+
+      const head = {
+        x: snake[0].x + direction.x,
+        y: snake[0].y + direction.y
+      };
+
+      // wrap around
+      if (head.x < 0) head.x = tileCount - 1;
+      if (head.x >= tileCount) head.x = 0;
+      if (head.y < 0) head.y = tileCount - 1;
+      if (head.y >= tileCount) head.y = 0;
+
+      // collision with self
+      if (snake.some(seg => seg.x === head.x && seg.y === head.y)) {
+        gameOver();
+        return;
+      }
+
+      snake.unshift(head);
+
+      // eat food
+      if (head.x === food.x && head.y === food.y) {
+        score++;
+        updateScore();
+        placeFood();
+      } else {
+        snake.pop();
+      }
+
+      drawGame();
+    }
+
+    function updateScore() {
+      document.getElementById("score").textContent = score;
+    }
+
+    function drawGame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // subtle grid
+      ctx.strokeStyle = "rgba(120, 160, 190, 0.08)";
+      for (let i = 0; i < tileCount; i++) {
+        for (let j = 0; j < tileCount; j++) {
+          ctx.strokeRect(i * grid, j * grid, grid, grid);
+        }
+      }
+
+      // draw mask food
+      drawMask(food.x * grid, food.y * grid);
+
+      // draw snake
+      snake.forEach((seg, index) => {
+        const x = seg.x * grid;
+        const y = seg.y * grid;
+
+        ctx.fillStyle = index === 0 ? "#556e82" : "#6d879b";
+        roundRect(ctx, x + 2, y + 2, grid - 4, grid - 4, 6, true, false);
+
+        // snake eyes on head
+        if (index === 0) {
+          ctx.fillStyle = "white";
+          ctx.beginPath();
+          ctx.arc(x + 7, y + 8, 2, 0, Math.PI * 2);
+          ctx.arc(x + 13, y + 8, 2, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = "#1b2d3b";
+          ctx.beginPath();
+          ctx.arc(x + 7, y + 8, 1, 0, Math.PI * 2);
+          ctx.arc(x + 13, y + 8, 1, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+    }
+
+    function drawMask(x, y) {
+      // blue mask body
+      ctx.fillStyle = "#79a7d8";
+      roundRect(ctx, x + 3, y + 6, 14, 8, 3, true, false);
+
+      // folds
+      ctx.strokeStyle = "#dcecff";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x + 5, y + 8);
+      ctx.lineTo(x + 15, y + 8);
+      ctx.moveTo(x + 5, y + 10);
+      ctx.lineTo(x + 15, y + 10);
+      ctx.stroke();
+
+      // ear loops
+      ctx.strokeStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(x + 3, y + 10, 2.5, Math.PI / 2, Math.PI * 1.5);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x + 17, y + 10, 2.5, Math.PI * 1.5, Math.PI / 2);
+      ctx.stroke();
+    }
+
+    function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+      if (typeof radius === "number") {
+        radius = { tl: radius, tr: radius, br: radius, bl: radius };
+      } else {
+        radius = { tl: 0, tr: 0, br: 0, bl: 0, ...radius };
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(x + radius.tl, y);
+      ctx.lineTo(x + width - radius.tr, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+      ctx.lineTo(x + width, y + height - radius.br);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+      ctx.lineTo(x + radius.bl, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+      ctx.lineTo(x, y + radius.tl);
+      ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    function hideGame() {
+      document.getElementById("gameCard").style.display = "none";
+      showToastMessage("Game hidden");
+    }
+
+    // --------------------------
+    // INIT
+    // --------------------------
+    setState("waiting");
+    initGame();
+  </script>
+</body>
+</html>
